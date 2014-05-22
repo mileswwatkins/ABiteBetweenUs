@@ -1,4 +1,4 @@
 ABiteBetweenUs
 ==============
 
-Web app to help find a restaurant that works for everyone
+Help friends find a restaurant that's convenient for everyone
