@@ -1,5 +1,5 @@
-define(function (require) {
-    var GeoJSON = require("geojson");
+define(["GeoJSON"], function() {
+    var GeoJSON = require(["geojson"]);
     console.log(GeoJSON);
 
 
@@ -22,16 +22,16 @@ define(function (require) {
     function createIsochrone(startingLocation, travelTimeInMinutes, transportMode) {
         if (TRANSPORT_MODES.indexOf(transportMode) == -1) {
             throw "Not a valid transport mode";
-        };
+        }
 
-        var distance = SPEEDS.transportMode / (travelTimeInMinutes / 60);
+        var distance = SPEEDS[transportMode] / (travelTimeInMinutes / 60);
         var deltaNorthSouth = distance * (1 / LATITUDE_DEGREE_LENGTH);
         var deltaEastWest = distance * (1 / LONGITUDE_DEGREE_LENGTH);
         var deltaDiagonal = distance * Math.sin(45 * (Math.PI / 180)) *
                 (1 / ((LONGITUDE_DEGREE_LENGTH + LATITUDE_DEGREE_LENGTH) / 2));
 
-        var startingLat = startingLocation[0]
-        var startingLon = startingLocation[1]
+        var startingLat = startingLocation[0];
+        var startingLon = startingLocation[1];
 
         var isochroneBounds = {"isochrone": [
                 [startingLat + deltaNorthSouth, startingLon],
@@ -44,9 +44,9 @@ define(function (require) {
                 [startingLat + deltaDiagonal, startingLon - deltaDiagonal]
         ]};
 
+        console.log(isochroneBounds);
         var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
         
-        console.log(isochrone);
         //return isochrone;
     }
 
