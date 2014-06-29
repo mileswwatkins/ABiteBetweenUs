@@ -1,8 +1,9 @@
-define(["GeoJSON"], function() {
-    var GeoJSON = require(["geojson"]);
-    console.log(GeoJSON);
+define(["require", "geojson"], function (require) {
+    var GeoJSON = require("geojson");
+    main();
+});
 
-
+function main() {
     // Latitude and longitude in statute miles, roughly, given a latitude
     // of 40 degrees
     var LATITUDE_DEGREE_LENGTH = 69;
@@ -24,7 +25,7 @@ define(["GeoJSON"], function() {
             throw "Not a valid transport mode";
         }
 
-        var distance = SPEEDS[transportMode] / (travelTimeInMinutes / 60);
+        var distance = SPEEDS[transportMode] * (travelTimeInMinutes / 60);
         var deltaNorthSouth = distance * (1 / LATITUDE_DEGREE_LENGTH);
         var deltaEastWest = distance * (1 / LONGITUDE_DEGREE_LENGTH);
         var deltaDiagonal = distance * Math.sin(45 * (Math.PI / 180)) *
@@ -33,7 +34,7 @@ define(["GeoJSON"], function() {
         var startingLat = startingLocation[0];
         var startingLon = startingLocation[1];
 
-        var isochroneBounds = {"isochrone": [
+        var isochroneBounds = [{"isochrone": [[
                 [startingLat + deltaNorthSouth, startingLon],
                 [startingLat + deltaDiagonal, startingLon + deltaDiagonal],
                 [startingLat, startingLon + deltaEastWest],
@@ -42,13 +43,12 @@ define(["GeoJSON"], function() {
                 [startingLat - deltaDiagonal, startingLon - deltaDiagonal],
                 [startingLat, startingLon - deltaEastWest],
                 [startingLat + deltaDiagonal, startingLon - deltaDiagonal]
-        ]};
+        ]]}];
 
-        console.log(isochroneBounds);
         var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
-        
-        //return isochrone;
+
+        return isochrone;
     }
 
-    createIsochrone([40, 80], 40, "walk");
-});
+    test_isochrone = createIsochrone([40, 80], 40, "walk");
+}
