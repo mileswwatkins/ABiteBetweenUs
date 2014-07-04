@@ -1,4 +1,23 @@
-define(["require", "geojson", "jsts/lib/javascript.util", "jsts/lib/jsts"], function (require) {
+define([
+        "require",
+        "geojson",
+
+        "jsts/lib/javascript.util",
+        "jsts/lib/jsts"
+        // "jsts/src/jsts",
+
+        // "jsts/src/jsts/geom/Geometry",
+        // "jsts/src/jsts/geom/GeometryFactory",
+        // "jsts/src/jsts/geom/PrecisionModel",
+        // "jsts/src/jsts/geom/Coordinate",
+        // "jsts/src/jsts/geom/LinearRing",
+        // "jsts/src/jsts/geom/LineString",
+        // "jsts/src/jsts/geom/Polygon",
+
+        // "jsts/src/jsts/io/GeoJSONParser",
+        // "jsts/src/jsts/io/GeoJSONReader"
+        ],
+        function (require) {
     var GeoJSON = require("geojson");
     main();
 });
@@ -57,15 +76,22 @@ function main() {
         Return the intersection of all passed geoJSON polygons
         */
 
-        areaInAll = jsts.io.GeoJSONReader(polygons.pop());
+        geometryFactory = new jsts.geom.GeometryFactory();
+        reader = new jsts.io.GeoJSONReader(geometryFactory);
+
+        foobar = polygons.pop();
+        console.log(foobar);
+        areaInAll = reader.read(foobar);
+        console.log(areaInAll.envelope);
         while (polygons.length > 0) {
-            intersectWithThis = jsts.io.GeoJSONReader(polygons.pop());
+            intersectWithThis = reader.read(polygons.pop());
             areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
-        areaInAllJSON = jsts.io.GeoJSONWriter(areaInAll);
+        // writer = new jsts.io.GeoJSONWriter();
+        // areaInAllJSON = writer.write(areaInAll);
 
-        return areaInAllJSON;
+        // return areaInAllJSON;
     }
 
     testIsochroneA = createIsochrone([40, 80], 30, "drive");
