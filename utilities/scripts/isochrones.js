@@ -50,9 +50,10 @@ function main() {
                 [originLat - deltaNorthSouth, originLon],
                 [originLat - deltaDiagonal, originLon - deltaDiagonal],
                 [originLat, originLon - deltaEastWest],
-                [originLat + deltaDiagonal, originLon - deltaDiagonal]
+                [originLat + deltaDiagonal, originLon - deltaDiagonal],
+                [originLat + deltaNorthSouth, originLon]
         ]]}];
-
+        
         var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
 
         return isochrone;
@@ -67,7 +68,6 @@ function main() {
         reader = new jsts.io.GeoJSONReader(geometryFactory);
 
         areaInAll = reader.read(polygons.pop().features[0].geometry);
-        console.log(areaInAll);
 
         while (polygons.length > 0) {
             intersectWithThis = reader.read(
@@ -81,8 +81,8 @@ function main() {
         return areaInAllJSON;
     }
 
-    testIsochroneA = createIsochrone([40, 80], 30, "drive");
-    testIsochroneB = createIsochrone([40, 80.005], 40, "walk");
+    testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
+    testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
     intersection = intersect([testIsochroneA, testIsochroneB]);
-    console.log(intersection);
+
 }
