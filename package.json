@@ -1,4 +1,4 @@
-{
+/*{
     "name": "tutorial2",
     "version": "0.0.1",
     "private": true,
@@ -22,4 +22,26 @@
     "url": "https://github.com/heroku/node-js-getting-started"
   }
 }
-
+*/
+{
+  "name": "node-example",
+  "version": "0.0.0",
+  "description": "This example app is so cool.",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mileswwatkins/ABiteBetweenUs.git"
+  },
+  "keywords": [
+    "example",
+    "heroku"
+  ],
+  "author": "jane-doe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jane-doe/node-example/issues"
+  }
+}
