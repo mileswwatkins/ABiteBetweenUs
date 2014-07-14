@@ -30,6 +30,8 @@ mongo.Db.connect(mongoUri, function (err, db) {
 
 var app = express();
 
+
+
 app.use(logfmt.requestLogger());
 
 //app.use('/', routes);
@@ -38,6 +40,13 @@ app.use(logfmt.requestLogger());
 
 app.get('/', function(req, res) {
   res.send('Hello World!');
+});
+
+app.set('views', path.join(__dirname, 'utilities'));
+app.set('view engine', 'html');
+
+app.get('/basic_google_map', function(req, res) {
+  res.render('basic_google_map');
 });
 
 var port = Number(process.env.PORT || 5000);
