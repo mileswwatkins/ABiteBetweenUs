@@ -28,10 +28,6 @@ mongo.Db.connect(mongoUri, function (err, db) {
 
 */
 
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
 var app = express();
 
 app.use(logfmt.requestLogger());
