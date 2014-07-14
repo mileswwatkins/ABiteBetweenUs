@@ -17,7 +17,8 @@
      "mongodb": "*",
      "monk": "*",
      "logfmt": "*",
-     "path": "*"
+     "path": "*",
+     "ejs": "*" // this is just for test purposes to display static html file
   },
   "repository": {
     "type": "git",

@@ -42,9 +42,10 @@ app.get('/', function(req, res) {
   res.send('Hello World!');
 });
 
-app.set('views', path.join(__dirname, 'utilities'));
-app.set('view engine', 'html');
 
+// test, to display google map html
+app.set('views', path.join(__dirname, '/utilities'));
+app.engine('html', require('ejs').renderFile);
 app.get('/basic_google_map', function(req, res) {
   res.render('basic_google_map');
 });
