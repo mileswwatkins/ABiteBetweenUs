@@ -16,7 +16,8 @@
      "jade": "~1.3.0",
      "mongodb": "*",
      "monk": "*",
-     "logfmt": "*"
+     "logfmt": "*",
+     "path": "*"
   },
   "repository": {
     "type": "git",
