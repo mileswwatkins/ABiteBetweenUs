@@ -45,7 +45,9 @@ app.get('/', function(req, res) {
 
 // test, to display google map html
 app.set('views', path.join(__dirname, '/views'));
-app.engine('html', require('ejs').renderFile);
+console.log(__dirname);
+
+app.engine('.html', require('ejs').renderFile);
 //app.set('view engine', 'jade');
 
 
