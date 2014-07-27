@@ -44,10 +44,13 @@ app.get('/', function(req, res) {
 
 
 // test, to display google map html
-app.set('views', path.join(__dirname, '/utilities'));
+app.set('views', path.join(__dirname, '/views'));
 app.engine('html', require('ejs').renderFile);
+//app.set('view engine', 'jade');
+
+
 app.get('/basic_google_map', function(req, res) {
-  res.render('basic_google_map');
+  res.render('basic_google_map.html');
 });
 
 var port = Number(process.env.PORT || 5000);
