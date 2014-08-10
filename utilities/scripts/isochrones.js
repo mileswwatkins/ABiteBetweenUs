@@ -3,8 +3,7 @@ define([
         "jsts/lib/javascript.util",
         "jsts/lib/jsts"
         ],
-        function (require) {
-    var GeoJSON = require("geojson");
+        function() {
     main();
 });
 
@@ -47,15 +46,15 @@ function main() {
         var LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT = 4;
         
         // Create the isochrone
-        geometryFactory = new jsts.geom.GeometryFactory();
-        origin = geometryFactory.createPoint(originLatLon);
-        isochrone = origin.buffer(
+        var geometryFactory = new jsts.geom.GeometryFactory();
+        var origin = geometryFactory.createPoint(originLatLon);
+        var isochrone = origin.buffer(
                 distance=distanceInDegrees,
                 quadrantSegments=LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT
                 );
         
         // Output the isochrone as a GeoJSON
-        writer = new jsts.io.GeoJSONWriter();
+        var writer = new jsts.io.GeoJSONWriter();
         var isochroneGeoJSON = writer.write(isochrone);
         return isochroneGeoJSON;
     }
@@ -65,30 +64,30 @@ function main() {
         Return the intersection of all passed geoJSON polygons
         */
 
-        geometryFactory = new jsts.geom.GeometryFactory();
-        reader = new jsts.io.GeoJSONReader(geometryFactory);
+        var geometryFactory = new jsts.geom.GeometryFactory();
+        var reader = new jsts.io.GeoJSONReader(geometryFactory);
 
-        areaInAll = reader.read(polygons.pop().features[0].geometry);
+        var areaInAll = reader.read(polygons.pop().features[0].geometry);
 
         while (polygons.length > 0) {
-            intersectWithThis = reader.read(
+            var intersectWithThis = reader.read(
                     polygons.pop().features[0].geometry);
-            areaInAll = areaInAll.intersection(intersectWithThis);
+            var areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
-        writer = new jsts.io.GeoJSONWriter();
-        areaInAllJSON = writer.write(areaInAll);
+        var writer = new jsts.io.GeoJSONWriter();
+        var areaInAllJSON = writer.write(areaInAll);
 
         return areaInAllJSON;
     }
 
-    testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
-    testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
-    intersection = intersect([testIsochroneA, testIsochroneB]);
+    var testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
+    var testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
+    var intersection = intersect([testIsochroneA, testIsochroneB]);
 
     function topCuisinesInArea (latLon) {
-        yelpRequest = new XMLHttpRequest();
-        yelpURL = "http://api.yelp.com/v2/search?term=cream+puffs&amp;location=San+Francisco";
+        var yelpRequest = new XMLHttpRequest();
+        var yelpURL = "http://api.yelp.com/v2/search?term=cream+puffs&amp;location=San+Francisco";
 
         yelpRequest.open("GET", yelpURL, false);
         yelpRequest.send();
