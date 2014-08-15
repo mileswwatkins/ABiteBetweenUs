@@ -1,62 +1,62 @@
 define([
         "require",
-        "geojson",
         "jsts/lib/javascript.util",
         "jsts/lib/jsts"
         ],
-        function (require) {
-    var GeoJSON = require("geojson");
+        function() {
     main();
 });
 
 function main() {
-    // Latitude and longitude in statute miles, roughly, given a latitude
-    // of 40 degrees
-    var LATITUDE_DEGREE_LENGTH = 69;
-    var LONGITUDE_DEGREE_LENGTH = 53;
-
-    // Approxiate mile-per-hour speeds of different transport modes
-    var TRANSPORT_MODES = ["walk", "bike", "transit", "drive"];
-    var SPEEDS = {
-            "walk": 3,
-            "bike": 12,
-            "transit": 8,
-            "drive": 30
-    };
-
-    function createIsochrone(originLatLon, travelTimeInMinutes, transportMode) {
+    function createIsochrone(
+            originLatLon,
+            travelTimeInMinutes,
+            transportMode
+            ) {
         /*
         Create isochrones based on transport mode, travel time, and
         starting location
         */
+
+        // Set constants
+        // Approxiate mile-per-hour speeds of different transport modes
+        var TRANSPORT_MODES = ["walk", "bike", "transit", "drive"];
+        var SPEEDS = {
+                "walk": 3,
+                "bike": 12,
+                "transit": 8,
+                "drive": 30
+        };
+        // Rough distance of a (latitude) degree length in miles
+        var DEGREE_LENGTH_IN_MILES = 69;
+
+        // Handle errors with parameters
+        if (travelTimeInMinutes <= 0) {
+            throw "Must have a positive travel time";
+        }
         if (TRANSPORT_MODES.indexOf(transportMode) == -1) {
             throw "Not a valid transport mode";
         }
 
-        var distance = SPEEDS[transportMode] * (travelTimeInMinutes / 60);
-        var deltaNorthSouth = distance * (1 / LATITUDE_DEGREE_LENGTH);
-        var deltaEastWest = distance * (1 / LONGITUDE_DEGREE_LENGTH);
-        var deltaDiagonal = distance * Math.sin(45 * (Math.PI / 180)) *
-                (1 / ((LONGITUDE_DEGREE_LENGTH + LATITUDE_DEGREE_LENGTH) / 2));
+        // Determine the radius of the isochrone, in degrees
+        var distanceInMiles = 
+                SPEEDS[transportMode] * (travelTimeInMinutes / 60);
+        var distanceInDegrees = distanceInMiles / DEGREE_LENGTH_IN_MILES;
 
-        var originLat = originLatLon[0];
-        var originLon = originLatLon[1];
-
-        var isochroneBounds = [{"isochrone": [[
-                [originLat + deltaNorthSouth, originLon],
-                [originLat + deltaDiagonal, originLon + deltaDiagonal],
-                [originLat, originLon + deltaEastWest],
-                [originLat - deltaDiagonal, originLon + deltaDiagonal],
-                [originLat - deltaNorthSouth, originLon],
-                [originLat - deltaDiagonal, originLon - deltaDiagonal],
-                [originLat, originLon - deltaEastWest],
-                [originLat + deltaDiagonal, originLon - deltaDiagonal],
-                [originLat + deltaNorthSouth, originLon]
-        ]]}];
+        var LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT = 4;
         
-        var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
-
-        return isochrone;
+        // Create the isochrone
+        var geometryFactory = new jsts.geom.GeometryFactory();
+        var origin = geometryFactory.createPoint(originLatLon);
+        var isochrone = origin.buffer(
+                distance=distanceInDegrees,
+                quadrantSegments=LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT
+                );
+        
+        // Output the isochrone as a GeoJSON
+        var writer = new jsts.io.GeoJSONWriter();
+        var isochroneGeoJSON = writer.write(isochrone);
+        return isochroneGeoJSON;
     }
 
     function intersect(polygons) {
@@ -64,25 +64,36 @@ function main() {
         Return the intersection of all passed geoJSON polygons
         */
 
-        geometryFactory = new jsts.geom.GeometryFactory();
-        reader = new jsts.io.GeoJSONReader(geometryFactory);
+        var geometryFactory = new jsts.geom.GeometryFactory();
+        var reader = new jsts.io.GeoJSONReader(geometryFactory);
 
-        areaInAll = reader.read(polygons.pop().features[0].geometry);
+        var areaInAll = reader.read(polygons.pop().features[0].geometry);
 
         while (polygons.length > 0) {
-            intersectWithThis = reader.read(
+            var intersectWithThis = reader.read(
                     polygons.pop().features[0].geometry);
-            areaInAll = areaInAll.intersection(intersectWithThis);
+            var areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
-        writer = new jsts.io.GeoJSONWriter();
-        areaInAllJSON = writer.write(areaInAll);
+        var writer = new jsts.io.GeoJSONWriter();
+        var areaInAllJSON = writer.write(areaInAll);
 
         return areaInAllJSON;
     }
 
-    testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
-    testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
-    intersection = intersect([testIsochroneA, testIsochroneB]);
+    var testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
+    var testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
+    var intersection = intersect([testIsochroneA, testIsochroneB]);
 
+    function topCuisinesInArea (latLon) {
+        var yelpRequest = new XMLHttpRequest();
+        var yelpURL = "http://api.yelp.com/v2/search?term=cream+puffs&amp;location=San+Francisco";
+
+        yelpRequest.open("GET", yelpURL, false);
+        yelpRequest.send();
+
+        return [];
+    }
+
+    // foobar = topCuisinesInArea([31.212, -23.568]);
 }
