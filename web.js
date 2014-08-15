@@ -45,8 +45,8 @@ app.use(logfmt.requestLogger());
 //app.use('/users', users);
 
 // default page to render at  basic url
-app.get('/', function(req, res) {
-  res.send(url.parse(req.url).pathname + "hola hombre");
+app.get('/hello/*', function(req, res) {
+  res.send("Fucking miles says: " + url.parse(req.url).pathname + ".... fucking miles...");
   //res.render('basic_google_map.html');
 });
 
