@@ -18,6 +18,7 @@
      "monk": "*",
      "logfmt": "*",
      "path": "*",
+     "url" : "*",
      "ejs": "*"
   },
   "repository": {

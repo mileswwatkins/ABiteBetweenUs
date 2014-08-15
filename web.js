@@ -11,6 +11,8 @@ var bodyParser = require('body-parser');
 
 var mongo = require('mongodb');
 
+var url = require('url');
+
 // this first section was (part of) how to hook up to local mongodb
 /*var mongo = require('mongodb');
 var monk = require('monk');
@@ -27,8 +29,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
 
 mongo.Db.connect(mongoUri, function (err, db) {
   db.collection('mydocs', function(er, collection) {
-    collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {
-    });
+    collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {  });
   });
 });
 
@@ -45,7 +46,7 @@ app.use(logfmt.requestLogger());
 
 // default page to render at  basic url
 app.get('/', function(req, res) {
-  res.send('Hello World!');
+  res.send(url.parse(req.url).pathname + "hola hombre");
   //res.render('basic_google_map.html');
 });
 
