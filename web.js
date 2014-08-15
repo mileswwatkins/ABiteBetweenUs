@@ -27,11 +27,14 @@ var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL ||
   'mongodb://localhost/mydb';
 
+  // this works, but inserts a dummy record. mimic this if you want to do shit 
+/*
 mongo.Db.connect(mongoUri, function (err, db) {
   db.collection('mydocs', function(er, collection) {
     collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {  });
   });
 });
+*/
 
 
 
@@ -46,7 +49,9 @@ app.use(logfmt.requestLogger());
 
 // default page to render at  basic url
 app.get('/hello/*', function(req, res) {
-  res.send("Fucking miles says: " + url.parse(req.url).pathname + ".... fucking miles...");
+  res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
+
+  //var abcdefg = JSON.parse(req.url.query);   
   //res.render('basic_google_map.html');
 });
 
