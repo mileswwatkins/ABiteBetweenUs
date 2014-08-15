@@ -49,9 +49,11 @@ app.use(logfmt.requestLogger());
 
 // default page to render at  basic url
 app.get('/hello/*', function(req, res) {
-  res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
+  //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
 
-  //var abcdefg = JSON.parse(req.url.query);   
+  //var abcdefg = //JSON.parse(
+  	console.log(url.parse(req.url).query);
+  	 //);   
   //res.render('basic_google_map.html');
 });
 
