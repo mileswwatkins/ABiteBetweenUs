@@ -53,7 +53,7 @@ app.get('/', function(req, res) {
 });
 
 // default page to render at  basic url
-app.get('/hello/latitude=*', function(req, res) {
+app.get('/hello/?latitude=*', function(req, res) {
 /*
 request({url: req.url,json: true}, function(err, resp, body) {
 	    res.send(body);
