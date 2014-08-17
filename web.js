@@ -12,7 +12,11 @@ var request = require("request");
 
 var mongo = require('mongodb');
 
+// trying to parse json out of the url... may not need all of these packages
 var url = require('url');
+var querystring = require('querystring');
+// express-specific answer that makes the above libaries unnecessary -
+// http://stackoverflow.com/questions/6912584/how-to-get-get-query-string-variables-in-node-js?rq=1
 
 // this first section was (part of) how to hook up to local mongodb
 /*var mongo = require('mongodb');
@@ -28,7 +32,7 @@ var mongoUri = process.env.MONGOLAB_URI ||
   process.env.MONGOHQ_URL ||
   'mongodb://localhost/mydb';
 
-  // this works, but inserts a dummy record. mimic this if you want to do shit 
+  // this works, but inserts a dummy record. mimic this if you want to do shit
 /*
 mongo.Db.connect(mongoUri, function (err, db) {
   db.collection('mydocs', function(er, collection) {
@@ -53,19 +57,24 @@ app.get('/', function(req, res) {
 });
 
 // default page to render at  basic url
-app.get('/hello/?latitude=*', function(req, res) {
+app.get('/generate_test_map/*', function(req, res) {
 /*
 request({url: req.url,json: true}, function(err, resp, body) {
 	    res.send(body);
 	}
 );
 */
-
+/*
 var input_query = url.parse(req.url).query;
 var latitude = substr(input_query, input_query.indexof("&"));
 var longitude = substr(input_qery, input_query.indexof("&"), input_qery.length);
 
 res.send("Latitude: " + latitude + " Longitude: " + longitude);
+*/
+
+var url_json_return = querystring.parse(url.parse(req.url).query);
+res.send("Latitude: " + url_json_return.latitude + " Longitude: " + url_json_return.longitude);
+
 
 
   //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
