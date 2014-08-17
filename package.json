@@ -17,10 +17,7 @@
      "mongodb": "*",
      "monk": "*",
      "logfmt": "*",
-     "request": "*",
      "path": "*",
-     "url" : "*",
-     "querystring": "*",
      "ejs": "*"
   },
   "repository": {

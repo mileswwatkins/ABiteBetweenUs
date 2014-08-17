@@ -12,6 +12,9 @@ var request = require("request");
 
 var mongo = require('mongodb');
 
+// fun timer for log. timer.log() to use
+var timer = logfmt.time('time');
+
 // trying to parse json out of the url... may not need all of these packages
 //var url = require('url');
 //var querystring = require('querystring');
@@ -62,11 +65,18 @@ app.get('/generate_test_map/*', function(req, res) {
 // the below two lines are one way to do url parsing to JSON if you aren't using express
 //var url_json_return = querystring.parse(url.parse(req.url).query);
 //res.send("Latitude: " + url_json_return.latitude + " Longitude: " + url_json_return.longitude);
-if (req.query.hasOwnProperty('latitude') && req.query.hasOwnProperty('longitude') ) 
+
+// extremely simple error checking here - only print lat/long if those are in the query
+if (req.query.hasOwnProperty('latitude') && req.query.hasOwnProperty('longitude') )
    {
+   	// try writing to the log the lat/long searched for, and time how long it takes to 
+   	// run the function on those coordinates and return something.
+   	 logfmt.log({latitude: req.query.latitude, longitude: req.query.longitude});
+   	 timer.log();
      res.send("Latitude: " + req.query.latitude + " Longitude: " + req.query.longitude);
+     timer.log();
    }
-else 
+else
    {
 	 res.send("You didn't give latitude and longitude. check spelling/case of keys");
    }
@@ -94,20 +104,5 @@ var port = Number(process.env.PORT || 5000);
 app.listen(port, function() {
   console.log("Listening on " + port);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
