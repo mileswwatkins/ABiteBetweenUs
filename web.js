@@ -54,13 +54,13 @@ app.get('/', function(req, res) {
 
 // default page to render at  basic url
 app.get('/hello/*', function(req, res) {
-
+/*
 request({url: req.url,json: true}, function(err, resp, body) {
 	    res.send(body);
 	}
 );
-
-  //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
+*/
+  res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
 
   //var 	abcdefg = JSON.parse(url.parse(req.url).query);
   	//console.log(url.parse(req.url).query);
