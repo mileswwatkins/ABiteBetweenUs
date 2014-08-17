@@ -1,9 +1,11 @@
 define([
         "require",
+        "geojson",
         "jsts/lib/javascript.util",
         "jsts/lib/jsts"
         ],
         function() {
+    var GeoJSON = require("geojson");
     main();
 });
 
@@ -14,7 +16,7 @@ function main() {
             transportMode
             ) {
         /*
-        Create isochrones based on transport mode, travel time, and
+        Create isochrone based on transport mode, travel time, and
         starting location
         */
 
@@ -42,21 +44,31 @@ function main() {
         var distanceInMiles = 
                 SPEEDS[transportMode] * (travelTimeInMinutes / 60);
         var distanceInDegrees = distanceInMiles / DEGREE_LENGTH_IN_MILES;
+        
+        // For the diagonals of the octagon, find the x- and y-distances
+        var distanceForDiagonals = distanceInDegrees / Math.sqrt(2);
 
-        var LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT = 4;
+        var originLat = originLatLon[0];
+        var originLon = originLatLon[1];
+
+        var isochroneBounds = [{"isochrone": [[
+                [originLat + distanceInDegrees, originLon],
+                [originLat + distanceForDiagonals, originLon + distanceForDiagonals],
+                [originLat, originLon + distanceInDegrees],
+                [originLat - distanceForDiagonals, originLon + distanceForDiagonals],
+                [originLat - distanceInDegrees, originLon],
+                [originLat - distanceForDiagonals, originLon - distanceForDiagonals],
+                [originLat, originLon - distanceInDegrees],
+                [originLat + distanceForDiagonals, originLon - distanceForDiagonals],
+                [originLat + distanceInDegrees, originLon]
+        ]]}];
         
-        // Create the isochrone
-        var geometryFactory = new jsts.geom.GeometryFactory();
-        var origin = geometryFactory.createPoint(originLatLon);
-        var isochrone = origin.buffer(
-                distance=distanceInDegrees,
-                quadrantSegments=LINE_SEGMENTS_PER_ISOCHRONE_QUADRANT
-                );
-        
-        // Output the isochrone as a GeoJSON
-        var writer = new jsts.io.GeoJSONWriter();
-        var isochroneGeoJSON = writer.write(isochrone);
-        return isochroneGeoJSON;
+        var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
+
+        url = JSON.stringify(isochrone);
+
+        return isochrone;
+
     }
 
     function intersect(polygons) {
@@ -81,9 +93,9 @@ function main() {
         return areaInAllJSON;
     }
 
-    var testIsochroneA = createIsochrone([31.212386, -23.568481], 20, "walk");
-    var testIsochroneB = createIsochrone([31.211275, -23.546208], 25, "walk");
-    var intersection = intersect([testIsochroneA, testIsochroneB]);
+    var testIsochroneA = createIsochrone([-83.751, 42.281], 20, "walk");
+    var testIsochroneB = createIsochrone([-83.746, 42.281], 25, "walk");
+    var testIntersection = intersect([testIsochroneA, testIsochroneB]);
 
     function topCuisinesInArea (latLon) {
         var yelpRequest = new XMLHttpRequest();

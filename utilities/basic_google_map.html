@@ -16,12 +16,14 @@
 var map;
 function initialize() {
   var mapOptions = {
-    zoom: 11,
-    center: new google.maps.LatLng(42.2814, -84.7483)
+    zoom: 13,
+    center: new google.maps.LatLng(-11, 10)
   };
   map = new google.maps.Map(document.getElementById('map-canvas'),
       mapOptions);
-  map.data.loadGeoJson('https://storage.googleapis.com/maps-devrel/google.json')
+
+  map.data.loadGeoJson("https://dl.dropboxusercontent.com/s/gmjgyl20s1ik7l3/sample_geojson.json");
+  map.data.loadGeoJson("https://dl.dropboxusercontent.com/s/jb6wonfniwh0c6q/sample_isochrone.json");
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
