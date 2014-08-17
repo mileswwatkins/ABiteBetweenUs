@@ -73,7 +73,10 @@ res.send("Latitude: " + latitude + " Longitude: " + longitude);
 */
 
 var url_json_return = querystring.parse(url.parse(req.url).query);
+
+
 res.send("Latitude: " + url_json_return.latitude + " Longitude: " + url_json_return.longitude);
+res.send("Latitude: " + req.query.latitude + " Longitude: " + req.query.longitude);
 
 
 
