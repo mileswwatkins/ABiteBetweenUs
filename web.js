@@ -62,8 +62,8 @@ request({url: req.url,json: true}, function(err, resp, body) {
 */
 
 var input_query = url.parse(req.url).query;
-var latitude = substr(input_query, indexof("&"));
-var longitude = substr(input_qery, indexof("&"), length(input_qery));
+var latitude = substr(input_query, input_query.indexof("&"));
+var longitude = substr(input_qery, input_query.indexof("&"), input_qery.length);
 
 res.send("Latitude: " + latitude + " Longitude: " + longitude);
 
