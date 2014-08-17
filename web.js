@@ -13,8 +13,9 @@ var request = require("request");
 var mongo = require('mongodb');
 
 // trying to parse json out of the url... may not need all of these packages
-var url = require('url');
-var querystring = require('querystring');
+//var url = require('url');
+//var querystring = require('querystring');
+
 // express-specific answer that makes the above libaries unnecessary -
 // http://stackoverflow.com/questions/6912584/how-to-get-get-query-string-variables-in-node-js?rq=1
 
@@ -46,46 +47,29 @@ mongo.Db.connect(mongoUri, function (err, db) {
 var app = express();
 
 
-
+// not exactly sure what this does, it is from heroku nodejs tutorial / getting started
 app.use(logfmt.requestLogger());
 
-//app.use('/', routes);
-//app.use('/users', users);
 
+// default page to render at  basic url
 app.get('/', function(req, res) {
   res.send("Ello chap. Get Rowdy.");
 });
 
-// default page to render at  basic url
+// testing JSON creation using Lat-Long
 app.get('/generate_test_map/*', function(req, res) {
-/*
-request({url: req.url,json: true}, function(err, resp, body) {
-	    res.send(body);
-	}
-);
-*/
-/*
-var input_query = url.parse(req.url).query;
-var latitude = substr(input_query, input_query.indexof("&"));
-var longitude = substr(input_qery, input_query.indexof("&"), input_qery.length);
 
-res.send("Latitude: " + latitude + " Longitude: " + longitude);
-*/
-
-var url_json_return = querystring.parse(url.parse(req.url).query);
-
-
+// the below two lines are one way to do url parsing to JSON if you aren't using express
+//var url_json_return = querystring.parse(url.parse(req.url).query);
 //res.send("Latitude: " + url_json_return.latitude + " Longitude: " + url_json_return.longitude);
-res.send("Latitude: " + req.query.latitude + " Longitude: " + req.query.longitude);
-
-
-
-  //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
-
-  //var 	abcdefg = JSON.parse(url.parse(req.url).query);
-  	//console.log(url.parse(req.url).query);
-  	 //);
-  //res.render('basic_google_map.html');
+if (req.query.hasOwnProperty('latitude') && req.query.hasOwnProperty('longitude') ) 
+   {
+     res.send("Latitude: " + req.query.latitude + " Longitude: " + req.query.longitude);
+   }
+else 
+   {
+	 res.send("You didn't give latitude and longitude. check spelling/case of keys");
+   }
 });
 
 
