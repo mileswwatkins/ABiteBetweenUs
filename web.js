@@ -8,6 +8,7 @@ var favicon = require('static-favicon');
 //var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var request = require("request");
 
 var mongo = require('mongodb');
 
@@ -47,13 +48,23 @@ app.use(logfmt.requestLogger());
 //app.use('/', routes);
 //app.use('/users', users);
 
+app.get('/', function(req, res) {
+  res.send("Ello chap. Get Rowdy.");
+});
+
 // default page to render at  basic url
 app.get('/hello/*', function(req, res) {
+
+request({url: req.url,json: true}, function(err, resp, body) {
+	    res.send(body);
+	}
+);
+
   //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
 
-  //var abcdefg = //JSON.parse(
-  	console.log(url.parse(req.url).query);
-  	 //);   
+  //var 	abcdefg = JSON.parse(url.parse(req.url).query);
+  	//console.log(url.parse(req.url).query);
+  	 //);
   //res.render('basic_google_map.html');
 });
 
