@@ -53,14 +53,22 @@ app.get('/', function(req, res) {
 });
 
 // default page to render at  basic url
-app.get('/hello/*', function(req, res) {
+app.get('/hello/latitude=*', function(req, res) {
 /*
 request({url: req.url,json: true}, function(err, resp, body) {
 	    res.send(body);
 	}
 );
 */
-  res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
+
+var input_query = url.parse(req.url).query;
+var latitude = substr(input_query, indexof("&"));
+var longitude = substr(input_qery, indexof("&"), length(input_qery));
+
+res.send("Latitude: " + latitude + " Longitude: " + longitude);
+
+
+  //res.send("Fucking miles says: " + url.parse(req.url).query + ".... fucking miles...");
 
   //var 	abcdefg = JSON.parse(url.parse(req.url).query);
   	//console.log(url.parse(req.url).query);
