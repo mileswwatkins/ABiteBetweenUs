@@ -110,7 +110,7 @@ app.engine('html', require('ejs').renderFile);
 // navigate to {default url}/basic_google_map and render basic_google_map.html
 app.get('/basic_google_map', function(req, res) {
   var testIsochroneA = isochrones.createIsochrone([-83.751, 42.281], 20, "walk");
-  //res.send(testIsochroneA);
+  res.send(testIsochroneA);
   //res.render('basic_google_map.html');
   res.send("Hello.");
 
