@@ -1,7 +1,7 @@
 
-var GeoJSON = require("geojson");
-var javascript = require("jsts/lib/javascript.util.js");
-var jsts = require("jsts/lib/jsts.js");
+var GeoJSON = require("./utilities/scripts/geojson.js");
+var javascript = require("./utilities/scripts/jsts/lib/javascript.util.js");
+var jsts = require("./utilities/scripts/jsts/lib/jsts.js");
 
 
 function createIsochrone(
