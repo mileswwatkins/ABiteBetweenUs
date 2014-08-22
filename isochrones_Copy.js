@@ -1,7 +1,8 @@
 
 var GeoJSON = require("geojson");
-var GeoJSON = require("jsts/lib/jsts");
-var GeoJSON = require("jsts/lib/javascript.util");
+var javascript = require("jsts/lib/javascript.util.js");
+var jsts = require("jsts/lib/jsts.js");
+
 
 function createIsochrone(
         originLatLon,
@@ -63,29 +64,7 @@ function createIsochrone(
     return isochrone;
 
 }
+//var testIsochroneA = createIsochrone([-83.751, 42.281], 20, "walk");
 
-function intersect(polygons) {
-    /*
-    Return the intersection of all passed geoJSON polygons
-    */
 
-    var geometryFactory = new jsts.geom.GeometryFactory();
-    var reader = new jsts.io.GeoJSONReader(geometryFactory);
-
-    var areaInAll = reader.read(polygons.pop().features[0].geometry);
-
-    while (polygons.length > 0) {
-        var intersectWithThis = reader.read(
-                polygons.pop().features[0].geometry);
-        var areaInAll = areaInAll.intersection(intersectWithThis);
-    }
-
-    var writer = new jsts.io.GeoJSONWriter();
-    var areaInAllJSON = writer.write(areaInAll);
-
-    return areaInAllJSON;
-}
-
-var testIsochroneA = createIsochrone([-83.751, 42.281], 20, "walk");
-var testIsochroneB = createIsochrone([-83.746, 42.281], 25, "walk");
-var testIntersection = intersect([testIsochroneA, testIsochroneB]);
+exports.createIsochrone = createIsochrone;
