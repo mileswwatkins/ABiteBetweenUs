@@ -11,8 +11,15 @@ var bodyParser = require('body-parser');
 
 var mongo = require('mongodb');
 
+var isochrones = require('./utilities/scripts/isochrone_Copy.js');
+
+// include the code Miles wrote so we can use his function
+// var isochrone = require('');
+
 // fun timer for log. timer.log() to use
 var timer = logfmt.time('time');
+
+
 
 // trying to parse json out of the url... may not need all of these packages
 //var url = require('url');
@@ -52,6 +59,9 @@ var app = express();
 // not exactly sure what this does, it is from heroku nodejs tutorial / getting started
 app.use(logfmt.requestLogger());
 
+// use miles's code?
+//app.use()
+
 
 // default page to render at  basic url
 app.get('/', function(req, res) {
@@ -68,16 +78,21 @@ app.get('/generate_test_map/*', function(req, res) {
 // extremely simple error checking here - only print lat/long if those are in the query
 if (req.query.hasOwnProperty('latitude') && req.query.hasOwnProperty('longitude') )
    {
-   	// try writing to the log the lat/long searched for, and time how long it takes to 
+   	// try writing to the log the lat/long searched for, and time how long it takes to
    	// run the function on those coordinates and return something.
+
+   	// console.log instead - individual session see the data in browser
    	 logfmt.log({latitude: req.query.latitude, longitude: req.query.longitude});
    	 timer.log();
+
+   	 // Where the magic happens
      res.send("Latitude: " + req.query.latitude + " Longitude: " + req.query.longitude);
+
      timer.log();
    }
 else
    {
-	 res.send("You didn't give latitude and longitude. check spelling/case of keys");
+	 res.send("You broked it cuz you didn't give latitude and longitude. check spelling/case of keys");
    }
 });
 
@@ -94,8 +109,16 @@ app.engine('html', require('ejs').renderFile);
 
 // navigate to {default url}/basic_google_map and render basic_google_map.html
 app.get('/basic_google_map', function(req, res) {
-  res.render('basic_google_map.html');
+  var testIsochroneA = createIsochrone([-83.751, 42.281], 20, "walk");
+  res.send(testIsochroneA);
+  //res.render('basic_google_map.html');
+  
+
+
 });
+
+
+
 
 // This is for heroku, don't change the port
 var port = Number(process.env.PORT || 5000);
