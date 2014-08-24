@@ -51,16 +51,17 @@ function main() {
         var originLat = originLatLon[0];
         var originLon = originLatLon[1];
 
+        // GeoJSON uses (x,y) for coordinates, not (lat,lon)
         var isochroneBounds = [{"isochrone": [[
-                [originLat + distanceInDegrees, originLon],
-                [originLat + distanceForDiagonals, originLon + distanceForDiagonals],
-                [originLat, originLon + distanceInDegrees],
-                [originLat - distanceForDiagonals, originLon + distanceForDiagonals],
-                [originLat - distanceInDegrees, originLon],
-                [originLat - distanceForDiagonals, originLon - distanceForDiagonals],
-                [originLat, originLon - distanceInDegrees],
-                [originLat + distanceForDiagonals, originLon - distanceForDiagonals],
-                [originLat + distanceInDegrees, originLon]
+                [originLon + distanceInDegrees, originLat],
+                [originLon + distanceForDiagonals, originLat + distanceForDiagonals],
+                [originLon, originLat + distanceInDegrees],
+                [originLon - distanceForDiagonals, originLat + distanceForDiagonals],
+                [originLon - distanceInDegrees, originLat],
+                [originLon - distanceForDiagonals, originLat - distanceForDiagonals],
+                [originLon, originLat - distanceInDegrees],
+                [originLon + distanceForDiagonals, originLat - distanceForDiagonals],
+                [originLon + distanceInDegrees, originLat]
         ]]}];
         
         var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
@@ -84,7 +85,7 @@ function main() {
         while (polygons.length > 0) {
             var intersectWithThis = reader.read(
                     polygons.pop().features[0].geometry);
-            var areaInAll = areaInAll.intersection(intersectWithThis);
+            areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
         var writer = new jsts.io.GeoJSONWriter();
@@ -93,9 +94,49 @@ function main() {
         return areaInAllJSON;
     }
 
-    var testIsochroneA = createIsochrone([-83.751, 42.281], 20, "walk");
-    var testIsochroneB = createIsochrone([-83.746, 42.281], 25, "walk");
-    var testIntersection = intersect([testIsochroneA, testIsochroneB]);
+    testIsochroneA = createIsochrone([42.2814, -83.7483], 20, "walk");
+    testIsochroneB = createIsochrone([42.2805, -83.7803], 25, "walk");
+    testIntersection = intersect([testIsochroneA, testIsochroneB]);
+
+    function geoJSONToGooglePolygon(polygon) {
+        /*
+        Convert a geoJSON polygon to a Google Polygon
+        */
+
+        var bounds = [];
+        polygon.coordinates[0].forEach(function(LonLat) {
+            bounds.push([LonLat[1], LonLat[0]]);
+        });
+
+        googlePolygon = new google.maps.Polygon({
+            paths: bounds
+        });
+
+        return googlePolygon;
+    }
+
+    function initializeGoogleMap(polygons) {
+        /*
+        Create a Google Maps Map object that covers the extent of all
+        polygons provided, ideally centered on their intersect
+        */
+
+        // Set center point and extent
+        var mapOptions = {
+            zoom: 12,
+            center: new google.maps.LatLng(42.2, -83.7)
+        };
+
+        // Create document-level map object that will be inserted into the view
+        map = new google.maps.Map(
+                document.getElementById("map-canvas"),
+                mapOptions
+        );
+
+        polygons.forEach(function(polygon) {
+            geoJSONToGooglePolygon(polygon).setMap(map);
+        });
+    }
 
     function topCuisinesInArea (latLon) {
         var yelpRequest = new XMLHttpRequest();
