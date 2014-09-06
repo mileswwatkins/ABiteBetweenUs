@@ -1,8 +1,17 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+        <script data-main="scripts/isochrones" src="scripts/require.js"></script>
+        <style>
+            html, body, #map-canvas {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+            }
+        </style>
     </head>
     <body>
-        <script data-main="scripts/isochrones" src="scripts/require.js"></script>
+        <div id="map-canvas"></div>
     </body>
 </html>

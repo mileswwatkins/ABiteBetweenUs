@@ -94,8 +94,8 @@ function main() {
         return areaInAllJSON;
     }
 
-    testIsochroneA = createIsochrone([42.2814, -83.7483], 20, "walk");
-    testIsochroneB = createIsochrone([42.2805, -83.7803], 25, "walk");
+    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
+    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
     testIntersection = intersect([testIsochroneA, testIsochroneB]);
 
     function geoJSONToGooglePolygon(polygon) {
@@ -105,7 +105,8 @@ function main() {
 
         var bounds = [];
         polygon.coordinates[0].forEach(function(LonLat) {
-            bounds.push([LonLat[1], LonLat[0]]);
+            googleBound = new google.maps.LatLng(LonLat[1], LonLat[0]);
+            bounds.push(googleBound);
         });
 
         googlePolygon = new google.maps.Polygon({
@@ -134,9 +135,12 @@ function main() {
         );
 
         polygons.forEach(function(polygon) {
+            console.log("got here");
             geoJSONToGooglePolygon(polygon).setMap(map);
         });
     }
+
+    initializeGoogleMap([testIntersection]);
 
     function topCuisinesInArea (latLon) {
         var yelpRequest = new XMLHttpRequest();
