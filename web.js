@@ -114,10 +114,15 @@ app.get('/basic_google_map', function(req, res) {
 
 
 
-  //res.send(testIsochroneA); - sends json
+  //res.send(testIsochroneA); - sends json text to the page (downloads in IE)
+
   //res.render('basic_google_map.html'); - renders basic html page
-  res.render('basic_google_map.html', { title: 'Google Map!' , isochrone: testIsochroneA}); // hopefully renders html page and
-                                                                                            // passes it rendered data
+
+  res.render('basic_google_map.html', { title: 'Google Map!' , isochrone: testIsochroneA});
+  // I think at this point we wouldn't actually render using nodejs. instead we would
+  // say to Ember, here is the JSON isochrone(s) we want you to plot, you know what to do... (maybe)
+
+  // way to send generic text to the page.
   //res.send("Hello.");
 
 
