@@ -69,7 +69,6 @@ function main() {
         url = JSON.stringify(isochrone);
 
         return isochrone;
-
     }
 
     function intersect(polygons) {
@@ -93,10 +92,6 @@ function main() {
 
         return areaInAllJSON;
     }
-
-    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
-    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    testIntersection = intersect([testIsochroneA, testIsochroneB]);
 
     function geoJSONToGooglePolygon(polygon) {
         /*
@@ -122,10 +117,38 @@ function main() {
         polygons provided, ideally centered on their intersect
         */
 
+        // Calculate center point of all polygons
+        min_lat = 90;
+        max_lat = -90;
+        min_lon = 90;
+        max_lon = -90;
+
+        polygons.forEach(function(polygon) {
+            polygon.coordinates[0].forEach(function(LonLat) {
+                if (LonLat[1] < min_lat) {
+                    min_lat = LonLat[1];
+                }
+                if (LonLat[1] > max_lat) {
+                    max_lat = LonLat[1];
+                }
+                if (LonLat[0] < min_lon) {
+                    min_lon = LonLat[0];
+                }
+                if (LonLat[0] > max_lon) {
+                    max_lon = LonLat[0];
+                }
+            });
+        });
+
+        mapCenter = new google.maps.LatLng(
+                (min_lat + max_lat) / 2,
+                (min_lon + max_lon) / 2
+        );
+
         // Set center point and extent
         var mapOptions = {
             zoom: 12,
-            center: new google.maps.LatLng(42.2, -83.7)
+            center: mapCenter
         };
 
         // Create document-level map object that will be inserted into the view
@@ -135,22 +158,21 @@ function main() {
         );
 
         polygons.forEach(function(polygon) {
-            console.log("got here");
             geoJSONToGooglePolygon(polygon).setMap(map);
         });
     }
 
+    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
+    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
+    testIntersection = intersect([testIsochroneA, testIsochroneB]);
     initializeGoogleMap([testIntersection]);
 
-    function topCuisinesInArea (latLon) {
-        var yelpRequest = new XMLHttpRequest();
-        var yelpURL = "http://api.yelp.com/v2/search?term=cream+puffs&amp;location=San+Francisco";
+    // Enable the form to update the isochrone and resultant intersection map
+    document.getElementById("userParameters").onsubmit = function(e) {
+        e.preventDefault();
 
-        yelpRequest.open("GET", yelpURL, false);
-        yelpRequest.send();
-
-        return [];
-    }
-
-    // foobar = topCuisinesInArea([31.212, -23.568]);
+        isochroneFromForm = createIsochrone(form[0], parseInt(form[1]), form[2]);
+        testIntersection = intersect([isochroneFromForm, testIsochroneB]);
+        initializeGoogleMap([testIntersection]);
+    };
 }

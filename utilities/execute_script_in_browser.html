@@ -1,17 +1,41 @@
 <!DOCTYPE html>
+
 <html>
     <head>
+        <!-- Import Google Maps and the isochrone-generating code -->
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
         <script data-main="scripts/isochrones" src="scripts/require.js"></script>
+        
+        <!-- Apply CSS to text and map elements -->
         <style>
+            html, body #userParameters {
+                font-family: "Verdana", Sans-serif;
+                font-size: 10pt;
+            }
             html, body, #map-canvas {
-            height: 100%;
-            margin: 0px;
-            padding: 0px
+                height: 100%;
+                margin: 0px;
             }
         </style>
     </head>
+    
     <body>
+        <!-- Create a form to accept user location and transit mode -->
+        <form id="userParameters" method="post">
+            Coming from <input name="origin">,
+
+            traveling no more than <input name="travelTimeInMinutes"> minutes
+            
+            by <select name="transportMode">
+                <option>walk</option>
+                <option>bike</option>
+                <option>drive</option>
+            </select>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <!-- Render the map of the resulting isochrone -->
         <div id="map-canvas"></div>
     </body>
 </html>
