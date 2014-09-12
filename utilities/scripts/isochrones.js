@@ -1,12 +1,10 @@
 define([
-        "require",
-        "geojson",
-        "jsts/lib/javascript.util",
-        "jsts/lib/jsts"
-        ],
-        function() {
-    var GeoJSON = require("geojson");
-    main();
+    "require",
+    "jsts/lib/javascript.util",
+    "jsts/lib/jsts"
+    ],
+    function() {
+        main();
 });
 
 function main() {
@@ -51,8 +49,8 @@ function main() {
         var originLat = originLatLon[0];
         var originLon = originLatLon[1];
 
-        // GeoJSON uses (x,y) for coordinates, not (lat,lon)
-        var isochroneBounds = [{"isochrone": [[
+        // GeoJSON uses (x,y) for coordinates, the opposite order of (lat,lon)
+        var isochroneBounds = [
                 [originLon + distanceInDegrees, originLat],
                 [originLon + distanceForDiagonals, originLat + distanceForDiagonals],
                 [originLon, originLat + distanceInDegrees],
@@ -62,11 +60,12 @@ function main() {
                 [originLon, originLat - distanceInDegrees],
                 [originLon + distanceForDiagonals, originLat - distanceForDiagonals],
                 [originLon + distanceInDegrees, originLat]
-        ]]}];
-        
-        var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
+        ];
 
-        url = JSON.stringify(isochrone);
+        var isochrone = {
+                type: "Polygon",
+                coordinates: isochroneBounds
+        };
 
         return isochrone;
     }
@@ -79,11 +78,11 @@ function main() {
         var geometryFactory = new jsts.geom.GeometryFactory();
         var reader = new jsts.io.GeoJSONReader(geometryFactory);
 
-        var areaInAll = reader.read(polygons.pop().features[0].geometry);
+        var areaInAll = reader.read(polygons.pop());
 
         while (polygons.length > 0) {
             var intersectWithThis = reader.read(
-                    polygons.pop().features[0].geometry);
+                    polygons.pop());
             areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
@@ -105,7 +104,15 @@ function main() {
         });
 
         googlePolygon = new google.maps.Polygon({
-            paths: bounds
+            paths: bounds,
+
+            fillColor: "#000000",
+            fillOpacity: 0.2,
+            
+            strokeColor: "#000000",
+            strokeOpacity: 0.6,
+            strokeWeight: 2,
+            strokePosition: google.maps.StrokePosition.OUTSIDE
         });
 
         return googlePolygon;
@@ -124,7 +131,7 @@ function main() {
         max_lon = -90;
 
         polygons.forEach(function(polygon) {
-            polygon.coordinates[0].forEach(function(LonLat) {
+            polygon.forEach(function(LonLat) {
                 if (LonLat[1] < min_lat) {
                     min_lat = LonLat[1];
                 }
@@ -157,22 +164,43 @@ function main() {
                 mapOptions
         );
 
+        // Add polygons to the view's data layer
+        var firstPolygon = true;
         polygons.forEach(function(polygon) {
-            geoJSONToGooglePolygon(polygon).setMap(map);
+            googlePolygon = geoJSONToGooglePolygon(polygon);
+
+            // Color the first one differently to indicate it is the main focus
+            if (firstPolygon) {
+                firstPolygon = false;
+                googlePolygon.setOptions({
+                        fillColor: "#A00000",
+                        strokeColor: "#A00000"
+                });
+            }
+
+            googlePolygon.setMap(map);
         });
     }
 
     testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
     testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    testIntersection = intersect([testIsochroneA, testIsochroneB]);
-    initializeGoogleMap([testIntersection]);
+    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
+    initializeGoogleMap([
+            testIntersectionA,
+            testIsochroneA,
+            testIsochroneB
+    ]);
 
     // Enable the form to update the isochrone and resultant intersection map
     document.getElementById("userParameters").onsubmit = function(e) {
         e.preventDefault();
 
-        isochroneFromForm = createIsochrone(form[0], parseInt(form[1]), form[2]);
-        testIntersection = intersect([isochroneFromForm, testIsochroneB]);
-        initializeGoogleMap([testIntersection]);
+        isochroneFromForm = createIsochrone(
+                userParameters.origin.value,
+                parseInt(userParameters.travelTimeInMinutes.value),
+                userParameters.transportMode.value
+        );
+        testIntersectionB = intersect([isochroneFromForm, testIsochroneB]);
+        initializeGoogleMap([testIntersectionA, testIntersectionB]);
     };
 }
