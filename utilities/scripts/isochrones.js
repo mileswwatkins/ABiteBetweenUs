@@ -89,6 +89,11 @@ function main() {
         var writer = new jsts.io.GeoJSONWriter();
         var areaInAllJSON = writer.write(areaInAll);
 
+        // Throw an error if the two polygons do not intersect
+        if (typeof areaInAll.coordinates === "undefined") {
+            throw "There is no intersection between these polygons";
+        }
+
         return areaInAllJSON;
     }
 
@@ -98,7 +103,7 @@ function main() {
         */
 
         var bounds = [];
-        polygon.coordinates[0].forEach(function(LonLat) {
+        polygon.coordinates.forEach(function(LonLat) {
             googleBound = new google.maps.LatLng(LonLat[1], LonLat[0]);
             bounds.push(googleBound);
         });
@@ -131,7 +136,7 @@ function main() {
         max_lon = -90;
 
         polygons.forEach(function(polygon) {
-            polygon.forEach(function(LonLat) {
+            polygon.coordinates.forEach(function(LonLat) {
                 if (LonLat[1] < min_lat) {
                     min_lat = LonLat[1];
                 }
@@ -184,9 +189,9 @@ function main() {
 
     testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
     testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
+    // testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
     initializeGoogleMap([
-            testIntersectionA,
+            // testIntersectionA,
             testIsochroneA,
             testIsochroneB
     ]);
