@@ -43,13 +43,13 @@ var mongoUri = process.env.MONGOLAB_URI ||
   'mongodb://localhost/mydb';
 
   // this works, but inserts a dummy record. mimic this if you want to do shit
-/*
+
 mongo.Db.connect(mongoUri, function (err, db) {
   db.collection('mydocs', function(er, collection) {
     collection.insert({'mykey': 'myvalue'}, {safe: true}, function(er,rs) {  });
   });
 });
-*/
+
 
 
 
@@ -65,7 +65,7 @@ app.use(logfmt.requestLogger());
 
 // default page to render at  basic url
 app.get('/', function(req, res) {
-  res.send("Ello chap. Get Rowdy.");
+  res.send("Hello World");
 });
 
 // testing JSON creation using Lat-Long
@@ -109,7 +109,11 @@ app.engine('html', require('ejs').renderFile);
 
 // navigate to {default url}/basic_google_map and render basic_google_map.html
 app.get('/basic_google_map', function(req, res) {
-  var testIsochroneA = isochrones.createIsochrone([-83.751, 42.281], 20, "walk");
+
+  // req.location;
+
+  // old version  of json code - comment out for now
+  // var testIsochroneA = isochrones.createIsochrone([-83.751, 42.281], 20, "walk");
 
 
 
@@ -117,14 +121,18 @@ app.get('/basic_google_map', function(req, res) {
   //res.send(testIsochroneA); - sends json text to the page (downloads in IE)
 
   //res.render('basic_google_map.html'); - renders basic html page
+  //res.locals.isocrhone = testIsochroneA;
+  //res.json({testIsochroneA});
+  res.render('basic_google_map.html'); //, {isochrone : testIsochroneA});
 
-  res.render('basic_google_map.html', { title: 'Google Map!' , isochrone: testIsochroneA});
   // I think at this point we wouldn't actually render using nodejs. instead we would
   // say to Ember, here is the JSON isochrone(s) we want you to plot, you know what to do... (maybe)
 
   // way to send generic text to the page.
   //res.send("Hello.");
 
+// 1.turn address into geolocation on server
+// 2. creation and intersection of json on server
 
 
 });

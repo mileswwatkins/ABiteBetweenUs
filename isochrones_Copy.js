@@ -35,10 +35,10 @@ function createIsochrone(
     }
 
     // Determine the radius of the isochrone, in degrees
-    var distanceInMiles = 
+    var distanceInMiles =
             SPEEDS[transportMode] * (travelTimeInMinutes / 60);
     var distanceInDegrees = distanceInMiles / DEGREE_LENGTH_IN_MILES;
-    
+
     // For the diagonals of the octagon, find the x- and y-distances
     var distanceForDiagonals = distanceInDegrees / Math.sqrt(2);
 
@@ -56,7 +56,7 @@ function createIsochrone(
             [originLat + distanceForDiagonals, originLon - distanceForDiagonals],
             [originLat + distanceInDegrees, originLon]
     ]]}];
-    
+
     var isochrone = GeoJSON.parse(isochroneBounds, {"Polygon": "isochrone"});
 
     url = JSON.stringify(isochrone);
