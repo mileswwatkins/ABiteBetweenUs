@@ -198,16 +198,46 @@ function main() {
             testIsochroneB
     ]);
 
+    function geocodeAddress (addressToGeocode) {
+        /*
+        Take a street address and return a set of geographic coordinates
+        */
+
+        // Make an API call to a geocoding service
+        // Currently use Google Maps, without a key
+        var API_URL_BASE =
+                "https://maps.googleapis.com/maps/api/geocode/json?address=";
+        var addressEncoded = encodeURIComponent(addressToGeocode);
+        apiURL = API_URL_BASE + addressEncoded;
+
+        // Send the request
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", apiURL, false);
+        xhr.send();
+        geocodingResponse = JSON.parse(xhr.responseText);
+
+        // Retrieve the latitude and longitude from the API's response
+        var latLonResponse = geocodingResponse.results[0].geometry.location;
+        var latLon = [latLonResponse.lat, latLonResponse.lng];
+
+        return latLon;
+    }
+
     // Enable the form to update the isochrone and resultant intersection map
     document.getElementById("userParameters").onsubmit = function(e) {
         e.preventDefault();
 
         isochroneFromForm = createIsochrone(
-                userParameters.origin.value,
+                geocodeAddress(userParameters.origin.value),
                 parseInt(userParameters.travelTimeInMinutes.value),
                 userParameters.transportMode.value
         );
-        testIntersectionB = intersect([isochroneFromForm, testIsochroneB]);
-        initializeGoogleMap([testIntersectionA, testIntersectionB]);
+        testIntersectionB = intersect([isochroneFromForm, testIntersectionA]);
+        initializeGoogleMap([
+                testIntersectionB,
+                testIsochroneA,
+                testIsochroneB,
+                isochroneFromForm
+        ]);
     };
 }
