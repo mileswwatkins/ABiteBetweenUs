@@ -64,7 +64,7 @@ function main() {
 
         var isochrone = {
                 type: "Polygon",
-                coordinates: isochroneBounds
+                coordinates: [isochroneBounds]
         };
 
         return isochrone;
@@ -75,8 +75,7 @@ function main() {
         Return the intersection of all passed geoJSON polygons
         */
 
-        var geometryFactory = new jsts.geom.GeometryFactory();
-        var reader = new jsts.io.GeoJSONReader(geometryFactory);
+        var reader = new jsts.io.GeoJSONReader();
 
         var areaInAll = reader.read(polygons.pop());
 
@@ -86,13 +85,13 @@ function main() {
             areaInAll = areaInAll.intersection(intersectWithThis);
         }
 
-        var writer = new jsts.io.GeoJSONWriter();
-        var areaInAllJSON = writer.write(areaInAll);
-
         // Throw an error if the two polygons do not intersect
-        if (typeof areaInAll.coordinates === "undefined") {
+        if (areaInAll.getArea() === 0) {
             throw "There is no intersection between these polygons";
         }
+        
+        var writer = new jsts.io.GeoJSONWriter();
+        var areaInAllJSON = writer.write(areaInAll);
 
         return areaInAllJSON;
     }
@@ -103,7 +102,7 @@ function main() {
         */
 
         var bounds = [];
-        polygon.coordinates.forEach(function(LonLat) {
+        polygon.coordinates[0].forEach(function(LonLat) {
             googleBound = new google.maps.LatLng(LonLat[1], LonLat[0]);
             bounds.push(googleBound);
         });
@@ -115,7 +114,7 @@ function main() {
             fillOpacity: 0.2,
             
             strokeColor: "#000000",
-            strokeOpacity: 0.6,
+            strokeOpacity: 0.3,
             strokeWeight: 2,
             strokePosition: google.maps.StrokePosition.OUTSIDE
         });
@@ -136,7 +135,7 @@ function main() {
         max_lon = -90;
 
         polygons.forEach(function(polygon) {
-            polygon.coordinates.forEach(function(LonLat) {
+            polygon.coordinates[0].forEach(function(LonLat) {
                 if (LonLat[1] < min_lat) {
                     min_lat = LonLat[1];
                 }
@@ -178,8 +177,11 @@ function main() {
             if (firstPolygon) {
                 firstPolygon = false;
                 googlePolygon.setOptions({
-                        fillColor: "#A00000",
-                        strokeColor: "#A00000"
+                        fillColor: "#FF0000",
+                        fillOpacity: 0.4,
+
+                        strokeColor: "#FF0000",
+                        strokeOpacity: 0.8
                 });
             }
 
@@ -189,9 +191,9 @@ function main() {
 
     testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
     testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    // testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
+    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
     initializeGoogleMap([
-            // testIntersectionA,
+            testIntersectionA,
             testIsochroneA,
             testIsochroneB
     ]);
