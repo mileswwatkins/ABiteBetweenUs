@@ -156,7 +156,7 @@ function main() {
         // Identify map bounds
         mapBounds = new google.maps.LatLngBounds();
 
-        // Set fallback map boundaries if there are no polygons
+        // Set fallback map bounds if there are no polygons
         // Use Ann Arbor as the default
         if (polygons.length === 0) {
             mapBounds.extend(new google.maps.LatLng(42.22, -83.80));
@@ -176,6 +176,7 @@ function main() {
         }
 
         // Create document-level map object that will be inserted into the view
+        // Use the bounds of the map to determine center point and zoom level
         var mapOptions = {
             center: mapBounds.getCenter()
         };
@@ -185,26 +186,29 @@ function main() {
         );
         map.fitBounds(mapBounds);
 
-        // Add polygons to the data layer of the view
+        // Add polygons to the view, including the overall intersection
         if (polygons.length > 0) {
-            var firstPolygon = true;
+            
+            // Add each polygon to the map's data layer
             polygons.forEach(function(polygon) {
                 googlePolygon = geoJSONToGooglePolygon(polygon);
-
-                // Color the first one differently to indicate it is the main focus
-                if (firstPolygon) {
-                    firstPolygon = false;
-                    googlePolygon.setOptions({
-                            fillColor: "#FF0000",
-                            fillOpacity: 0.4,
-
-                            strokeColor: "#FF0000",
-                            strokeOpacity: 0.8
-                    });
-                }
-
                 googlePolygon.setMap(map);
             });
+
+            // Determine the intersection of all polygons, and add it as well
+            // Color the intersection differently draw the user's attention
+            var intersectionPolygon =
+                    geoJSONToGooglePolygon(intersect(polygons));
+
+            googlePolygon.setOptions({
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.4,
+
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8
+            });
+
+            intersectionPolygon.setMap(map);
         }
     }
 
@@ -217,11 +221,8 @@ function main() {
                 parseInt(userParameters.travelTimeInMinutes.value),
                 userParameters.transportMode.value
         );
-        testIntersectionB = intersect([isochroneFromForm, testIntersectionA]);
+
         initializeGoogleMap([
-                testIntersectionB,
-                testIsochroneA,
-                testIsochroneB,
                 isochroneFromForm
         ]);
     };
