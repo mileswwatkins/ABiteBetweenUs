@@ -122,41 +122,78 @@ function main() {
         return googlePolygon;
     }
 
+    function geocodeAddress (addressToGeocode) {
+        /*
+        Take a street address and return a set of geographic coordinates
+        */
+
+        // Make an API call to a geocoding service
+        // Currently use Google Maps, without a key
+        var API_URL_BASE =
+                "https://maps.googleapis.com/maps/api/geocode/json?address=";
+        var addressEncoded = encodeURIComponent(addressToGeocode);
+        apiURL = API_URL_BASE + addressEncoded;
+
+        // Send the request
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", apiURL, false);
+        xhr.send();
+
+        // Retrieve the latitude and longitude from the API's response
+        geocodingResponse = JSON.parse(xhr.responseText);
+        var latLonResponse = geocodingResponse.results[0].geometry.location;
+        var latLon = [latLonResponse.lat, latLonResponse.lng];
+
+        return latLon;
+    }
+
     function initializeGoogleMap(polygons) {
         /*
         Create a Google Maps Map object that covers the extent of all
         polygons provided, ideally centered on their intersect
         */
 
-        // Calculate center point of all polygons
-        min_lat = 90;
-        max_lat = -90;
-        min_lon = 90;
-        max_lon = -90;
+        // Initialize latitude and longitude values as greatest possible values
+        var min_lat = 90;
+        var max_lat = -90;
+        var min_lon = 180;
+        var max_lon = -180;
 
-        polygons.forEach(function(polygon) {
-            polygon.coordinates[0].forEach(function(LonLat) {
-                if (LonLat[1] < min_lat) {
-                    min_lat = LonLat[1];
-                }
-                if (LonLat[1] > max_lat) {
-                    max_lat = LonLat[1];
-                }
-                if (LonLat[0] < min_lon) {
-                    min_lon = LonLat[0];
-                }
-                if (LonLat[0] > max_lon) {
-                    max_lon = LonLat[0];
-                }
+        // Set fallback center point if there are no polygons
+        // Use Ann Arbor as the default
+        if (polygons.length === 0) {
+            min_lat = 42.22;
+            max_lat = 42.33;
+            min_lon = -83.80;
+            max_lon = -83.67;
+        }
+
+        // If there are polygons, calculate overall center point
+        else {
+            polygons.forEach(function(polygon) {
+                polygon.coordinates[0].forEach(function(LonLat) {
+                    if (LonLat[1] < min_lat) {
+                        min_lat = LonLat[1];
+                    }
+                    if (LonLat[1] > max_lat) {
+                        max_lat = LonLat[1];
+                    }
+                    if (LonLat[0] < min_lon) {
+                        min_lon = LonLat[0];
+                    }
+                    if (LonLat[0] > max_lon) {
+                        max_lon = LonLat[0];
+                    }
+                });
             });
-        });
+        }
 
-        mapCenter = new google.maps.LatLng(
+        var mapCenter = new google.maps.LatLng(
                 (min_lat + max_lat) / 2,
                 (min_lon + max_lon) / 2
         );
 
-        // Set center point and extent
+        // Set center point
         var mapOptions = {
             zoom: 12,
             center: mapCenter
@@ -167,6 +204,12 @@ function main() {
                 document.getElementById("map-canvas"),
                 mapOptions
         );
+
+        // Set extent of the map, based on the maximum and minimum points
+        var mapBounds = new google.maps.LatLngBounds();
+        mapBounds.extend(new google.maps.LatLng(min_lat, min_lon));
+        mapBounds.extend(new google.maps.LatLng(max_lat, max_lon));
+        map.fitBounds(mapBounds);
 
         // Add polygons to the view's data layer
         var firstPolygon = true;
@@ -189,40 +232,6 @@ function main() {
         });
     }
 
-    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
-    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
-    initializeGoogleMap([
-            testIntersectionA,
-            testIsochroneA,
-            testIsochroneB
-    ]);
-
-    function geocodeAddress (addressToGeocode) {
-        /*
-        Take a street address and return a set of geographic coordinates
-        */
-
-        // Make an API call to a geocoding service
-        // Currently use Google Maps, without a key
-        var API_URL_BASE =
-                "https://maps.googleapis.com/maps/api/geocode/json?address=";
-        var addressEncoded = encodeURIComponent(addressToGeocode);
-        apiURL = API_URL_BASE + addressEncoded;
-
-        // Send the request
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", apiURL, false);
-        xhr.send();
-        geocodingResponse = JSON.parse(xhr.responseText);
-
-        // Retrieve the latitude and longitude from the API's response
-        var latLonResponse = geocodingResponse.results[0].geometry.location;
-        var latLon = [latLonResponse.lat, latLonResponse.lng];
-
-        return latLon;
-    }
-
     // Enable the form to update the isochrone and resultant intersection map
     document.getElementById("userParameters").onsubmit = function(e) {
         e.preventDefault();
@@ -240,4 +249,10 @@ function main() {
                 isochroneFromForm
         ]);
     };
+
+    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
+    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
+    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
+
+    initializeGoogleMap([]);
 }

@@ -22,15 +22,15 @@
     <body>
         <!-- Create a form to accept user location and transit mode -->
         <form id="userParameters" method="post">
-            Coming from <input name="origin" size=32>,
+            I'm coming from <input name="origin" size=32>,
 
-            traveling no more than <input name="travelTimeInMinutes" size=1> minutes
-            
-            by <select name="transportMode">
+            and would like to <select name="transportMode">
                 <option>walk</option>
                 <option>bike</option>
                 <option>drive</option>
             </select>
+
+            no more than <input name="travelTimeInMinutes" size=1> minutes
 
             <button type="submit">Submit</button>
         </form>
