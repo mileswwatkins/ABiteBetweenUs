@@ -153,83 +153,59 @@ function main() {
         polygons provided, ideally centered on their intersect
         */
 
-        // Initialize latitude and longitude values as greatest possible values
-        var min_lat = 90;
-        var max_lat = -90;
-        var min_lon = 180;
-        var max_lon = -180;
+        // Identify map bounds
+        mapBounds = new google.maps.LatLngBounds();
 
-        // Set fallback center point if there are no polygons
+        // Set fallback map boundaries if there are no polygons
         // Use Ann Arbor as the default
         if (polygons.length === 0) {
-            min_lat = 42.22;
-            max_lat = 42.33;
-            min_lon = -83.80;
-            max_lon = -83.67;
+            mapBounds.extend(new google.maps.LatLng(42.22, -83.80));
+            mapBounds.extend(new google.maps.LatLng(42.33, -83.67));
         }
 
-        // If there are polygons, calculate overall center point
+        // If there are polygons, calculate bounds for the map
         else {
             polygons.forEach(function(polygon) {
                 polygon.coordinates[0].forEach(function(LonLat) {
-                    if (LonLat[1] < min_lat) {
-                        min_lat = LonLat[1];
-                    }
-                    if (LonLat[1] > max_lat) {
-                        max_lat = LonLat[1];
-                    }
-                    if (LonLat[0] < min_lon) {
-                        min_lon = LonLat[0];
-                    }
-                    if (LonLat[0] > max_lon) {
-                        max_lon = LonLat[0];
-                    }
+                    mapBounds.extend(new google.maps.LatLng(
+                            LonLat[1],
+                            LonLat[0]
+                    ));
                 });
             });
         }
 
-        var mapCenter = new google.maps.LatLng(
-                (min_lat + max_lat) / 2,
-                (min_lon + max_lon) / 2
-        );
-
-        // Set center point
-        var mapOptions = {
-            zoom: 12,
-            center: mapCenter
-        };
-
         // Create document-level map object that will be inserted into the view
+        var mapOptions = {
+            center: mapBounds.getCenter()
+        };
         map = new google.maps.Map(
                 document.getElementById("map-canvas"),
                 mapOptions
         );
-
-        // Set extent of the map, based on the maximum and minimum points
-        var mapBounds = new google.maps.LatLngBounds();
-        mapBounds.extend(new google.maps.LatLng(min_lat, min_lon));
-        mapBounds.extend(new google.maps.LatLng(max_lat, max_lon));
         map.fitBounds(mapBounds);
 
-        // Add polygons to the view's data layer
-        var firstPolygon = true;
-        polygons.forEach(function(polygon) {
-            googlePolygon = geoJSONToGooglePolygon(polygon);
+        // Add polygons to the data layer of the view
+        if (polygons.length > 0) {
+            var firstPolygon = true;
+            polygons.forEach(function(polygon) {
+                googlePolygon = geoJSONToGooglePolygon(polygon);
 
-            // Color the first one differently to indicate it is the main focus
-            if (firstPolygon) {
-                firstPolygon = false;
-                googlePolygon.setOptions({
-                        fillColor: "#FF0000",
-                        fillOpacity: 0.4,
+                // Color the first one differently to indicate it is the main focus
+                if (firstPolygon) {
+                    firstPolygon = false;
+                    googlePolygon.setOptions({
+                            fillColor: "#FF0000",
+                            fillOpacity: 0.4,
 
-                        strokeColor: "#FF0000",
-                        strokeOpacity: 0.8
-                });
-            }
+                            strokeColor: "#FF0000",
+                            strokeOpacity: 0.8
+                    });
+                }
 
-            googlePolygon.setMap(map);
-        });
+                googlePolygon.setMap(map);
+            });
+        }
     }
 
     // Enable the form to update the isochrone and resultant intersection map
