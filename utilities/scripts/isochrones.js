@@ -75,17 +75,19 @@ function main() {
         Return the intersection of all passed geoJSON polygons
         */
 
-        var reader = new jsts.io.GeoJSONReader();
-
-        var areaInAll = reader.read(polygons.pop());
-
-        while (polygons.length > 0) {
-            var intersectWithThis = reader.read(
-                    polygons.pop());
-            areaInAll = areaInAll.intersection(intersectWithThis);
+        // Throw an error if no polygons are provided
+        if (polygons.length === 0) {
+            throw "No polygons were provided to intersect";
         }
 
-        // Throw an error if the two polygons do not intersect
+        var reader = new jsts.io.GeoJSONReader();
+
+        var areaInAll = reader.read(polygons[0]);
+        polygons.forEach(function(intersectWithThis) {
+            areaInAll = areaInAll.intersection(reader.read(intersectWithThis));
+        });
+
+        // Throw an error if the polygons do not intersect
         if (areaInAll.getArea() === 0) {
             throw "There is no intersection between these polygons";
         }
@@ -107,7 +109,7 @@ function main() {
             bounds.push(googleBound);
         });
 
-        googlePolygon = new google.maps.Polygon({
+        var googlePolygon = new google.maps.Polygon({
             paths: bounds,
 
             fillColor: "#000000",
@@ -132,7 +134,7 @@ function main() {
         var API_URL_BASE =
                 "https://maps.googleapis.com/maps/api/geocode/json?address=";
         var addressEncoded = encodeURIComponent(addressToGeocode);
-        apiURL = API_URL_BASE + addressEncoded;
+        var apiURL = API_URL_BASE + addressEncoded;
 
         // Send the request
         var xhr = new XMLHttpRequest();
@@ -140,11 +142,20 @@ function main() {
         xhr.send();
 
         // Retrieve the latitude and longitude from the API's response
-        geocodingResponse = JSON.parse(xhr.responseText);
-        var latLonResponse = geocodingResponse.results[0].geometry.location;
-        var latLon = [latLonResponse.lat, latLonResponse.lng];
+        // Also, check to make sure the geocoding succeeded
+        var geocodingResponse = JSON.parse(xhr.responseText);
 
-        return latLon;
+        if (geocodingResponse.status != "OK") {
+            throw("Address geocoding failed");
+        }
+
+        else {
+            var latLonResponse =
+                    geocodingResponse.results[0].geometry.location;
+            var latLon = [latLonResponse.lat, latLonResponse.lng];
+    
+            return latLon;
+        }
     }
 
     function initializeGoogleMap(polygons) {
@@ -154,7 +165,7 @@ function main() {
         */
 
         // Identify map bounds
-        mapBounds = new google.maps.LatLngBounds();
+        var mapBounds = new google.maps.LatLngBounds();
 
         // Set fallback map bounds if there are no polygons
         // Use Ann Arbor as the default
@@ -180,7 +191,7 @@ function main() {
         var mapOptions = {
             center: mapBounds.getCenter()
         };
-        map = new google.maps.Map(
+        var map = new google.maps.Map(
                 document.getElementById("map-canvas"),
                 mapOptions
         );
@@ -188,11 +199,10 @@ function main() {
 
         // Add polygons to the view, including the overall intersection
         if (polygons.length > 0) {
-            
+
             // Add each polygon to the map's data layer
             polygons.forEach(function(polygon) {
-                googlePolygon = geoJSONToGooglePolygon(polygon);
-                googlePolygon.setMap(map);
+                geoJSONToGooglePolygon(polygon).setMap(map);
             });
 
             // Determine the intersection of all polygons, and add it as well
@@ -200,7 +210,7 @@ function main() {
             var intersectionPolygon =
                     geoJSONToGooglePolygon(intersect(polygons));
 
-            googlePolygon.setOptions({
+            intersectionPolygon.setOptions({
                     fillColor: "#FF0000",
                     fillOpacity: 0.4,
 
@@ -212,7 +222,13 @@ function main() {
         }
     }
 
-    // Enable the form to update the isochrone and resultant intersection map
+    // Actually add the Google map to the view
+    initializeGoogleMap([]);
+
+    // Create the list of user isochrones
+    isochrones = [];
+
+    // Enable the form to update the isochrones and resultant intersection map
     document.getElementById("userParameters").onsubmit = function(e) {
         e.preventDefault();
 
@@ -222,14 +238,8 @@ function main() {
                 userParameters.transportMode.value
         );
 
-        initializeGoogleMap([
-                isochroneFromForm
-        ]);
+        isochrones.push(isochroneFromForm);
+
+        initializeGoogleMap(isochrones);
     };
-
-    testIsochroneA = createIsochrone([42.2814, -83.7483], 40, "walk");
-    testIsochroneB = createIsochrone([42.2805, -83.7803], 30, "walk");
-    testIntersectionA = intersect([testIsochroneA, testIsochroneB]);
-
-    initializeGoogleMap([]);
 }
