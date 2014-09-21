@@ -8,6 +8,59 @@ define([
 });
 
 function main() {
+    function findLengthOfDegree(originLatitude) {
+        /*
+        Determine the length of one degree of latitude and longitude,
+        at a given latitude
+
+        Code adapted from a calculator by the National Geospatial
+        Intelligence Agency's Maritime Safety Information office:
+        http://msi.nga.mil/MSISiteContent/StaticFiles/Calculators/degree.html
+        */
+
+        // Convert latitude to radians
+        var DEGREES_PER_RADIAN = (2 * Math.PI) / 360;
+        var latitudeInRadians = originLatitude * DEGREES_PER_RADIAN;
+
+        // Set up constants for the calculation
+        // Latitude calculation terms
+        var M1 = 111132.92;
+        var M2 = -559.82;
+        var M3 = 1.175;
+        var M4 = -0.0023;
+
+        // Longitude calculation terms
+        var P1 = 111412.84;
+        var P2 = -93.5;
+        var P3 = 0.118;
+
+        // Calculate the length of a degree of latitude and longitude in meters
+        var latitudeLengthInMeters =
+                (M1) +
+                (M2 * Math.cos(2 * latitudeInRadians)) +
+                (M3 * Math.cos(4 * latitudeInRadians)) +
+                (M4 * Math.cos(6 * latitudeInRadians))
+                ;
+
+        var longitudeLengthInMeters =
+                (P1 * Math.cos(latitudeInRadians)) +
+                (P2 * Math.cos(3 * latitudeInRadians)) +
+                (P3 * Math.cos(5 * latitudeInRadians))
+                ;
+
+        // Convert the degree lengths to statute miles
+        var METERS_PER_MILE = 1609.34;
+        var latitudeLengthInMiles = latitudeLengthInMeters / METERS_PER_MILE;
+        var longitudeLengthInMiles = longitudeLengthInMeters / METERS_PER_MILE;
+        
+        var degreeLengths = {
+            lat: latitudeLengthInMiles,
+            lon: longitudeLengthInMiles
+        };
+
+        return degreeLengths;
+    }
+
     function createIsochrone(
             originLatLon,
             travelTimeInMinutes,
@@ -27,8 +80,6 @@ function main() {
                 "transit": 8,
                 "drive": 30
         };
-        // Rough distance of a (latitude) degree length in miles
-        var DEGREE_LENGTH_IN_MILES = 69;
 
         // Handle errors with parameters
         if (travelTimeInMinutes <= 0) {
@@ -38,30 +89,40 @@ function main() {
             throw "Not a valid transport mode";
         }
 
-        // Determine the radius of the isochrone, in degrees
+        // Determine the radii (in latitude and longitude degrees) of the isochrone
+        var degreeLengths = findLengthOfDegree(originLatLon[0]);
+
         var distanceInMiles = 
                 SPEEDS[transportMode] * (travelTimeInMinutes / 60);
-        var distanceInDegrees = distanceInMiles / DEGREE_LENGTH_IN_MILES;
+
+        distanceInLatDegrees = distanceInMiles / degreeLengths.lat;
+        distanceInLonDegrees = distanceInMiles / degreeLengths.lon;
         
-        // For the diagonals of the octagon, find the x- and y-distances
-        var distanceForDiagonals = distanceInDegrees / Math.sqrt(2);
+        // For the diagonals of the isochrone, find the lat and lon distances
+        distanceForDiagonals = Math.sqrt(
+                Math.pow(distanceInLatDegrees, 2) +
+                Math.pow(distanceInLonDegrees, 2)
+                ) / 2
+                ;
 
         var originLat = originLatLon[0];
         var originLon = originLatLon[1];
 
+        // Create a rough octagon of the isochrone's bounds
         // GeoJSON uses (x,y) for coordinates, the opposite order of (lat,lon)
         var isochroneBounds = [
-                [originLon + distanceInDegrees, originLat],
+                [originLon + distanceInLonDegrees, originLat],
                 [originLon + distanceForDiagonals, originLat + distanceForDiagonals],
-                [originLon, originLat + distanceInDegrees],
+                [originLon, originLat + distanceInLatDegrees],
                 [originLon - distanceForDiagonals, originLat + distanceForDiagonals],
-                [originLon - distanceInDegrees, originLat],
+                [originLon - distanceInLonDegrees, originLat],
                 [originLon - distanceForDiagonals, originLat - distanceForDiagonals],
-                [originLon, originLat - distanceInDegrees],
+                [originLon, originLat - distanceInLatDegrees],
                 [originLon + distanceForDiagonals, originLat - distanceForDiagonals],
-                [originLon + distanceInDegrees, originLat]
+                [originLon + distanceInLonDegrees, originLat]
         ];
 
+        // Create a geoJSON object containing this information
         var isochrone = {
                 type: "Polygon",
                 coordinates: [isochroneBounds]
