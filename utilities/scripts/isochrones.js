@@ -8,7 +8,12 @@ define([
 });
 
 function main() {
-    function findLengthOfDegree(originLatitude) {
+    // Declare the map and user isochrones
+    var map;
+    var isochrones = [];
+
+
+    function findDegreeLengths(originLatitude) {
         /*
         Determine the length of one degree of latitude and longitude,
         at a given latitude
@@ -90,7 +95,7 @@ function main() {
         }
 
         // Determine the radii (in latitude and longitude degrees) of the isochrone
-        var degreeLengths = findLengthOfDegree(originLatLon[0]);
+        var degreeLengths = findDegreeLengths(originLatLon[0]);
 
         var distanceInMiles = 
                 SPEEDS[transportMode] * (travelTimeInMinutes / 60);
@@ -148,9 +153,10 @@ function main() {
             areaInAll = areaInAll.intersection(reader.read(intersectWithThis));
         });
 
-        // Throw an error if the polygons do not intersect
+        // Show an error and start over if the polygons do not intersect
         if (areaInAll.getArea() === 0) {
-            throw "There is no intersection between these polygons";
+            window.alert("No intersection found, reloading page");
+            location.reload();
         }
         
         var writer = new jsts.io.GeoJSONWriter();
@@ -252,7 +258,7 @@ function main() {
         var mapOptions = {
             center: mapBounds.getCenter()
         };
-        var map = new google.maps.Map(
+        map = new google.maps.Map(
                 document.getElementById("map-canvas"),
                 mapOptions
         );
@@ -280,20 +286,72 @@ function main() {
             });
 
             intersectionPolygon.setMap(map);
+            showRestaurantsWithinArea(intersect(polygons));
         }
+    }
+
+    function addRestaurantToMap(place) {
+        /*
+        Add an item to the map
+        */
+
+        // Instantiate the marker
+        var marker = new google.maps.Marker({
+            map: map,
+            position: place.geometry.location
+        });
+
+        // Define marker actions
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.setContent(place.name);
+            infowindow.open(map, this);
+        });
+    }
+
+    function showRestaurantsWithinArea(areaToSearch) {
+        /*
+        Search for restaurants within a given area, and add results to
+        the map
+        */
+
+        // Get the bounding box of the area to search
+        var searchBounds = new google.maps.LatLngBounds();
+        areaToSearch.coordinates[0].forEach(function(LonLat) {
+            searchBounds.extend(new google.maps.LatLng(
+                    LonLat[1],
+                    LonLat[0]
+            ));
+        });
+
+        // Set the search parameters and make the search
+        // Display the results on the map
+        var restaurantParameters = {
+            location: searchBounds,
+            rankBy: google.maps.places.RankBy.PROMINENCE,
+            types: ["restaurant"]
+        };
+
+        var placesService = new google.maps.places.PlacesService(map);
+        placesService.nearbySearch(
+                restaurantParameters,
+                function(results, status) {
+                    if (status == google.maps.places.PlacesServiceStatus.OK) {
+                        results.forEach(function(result) {
+                            addRestaurantToMap(result);
+                        });
+                    }
+                }
+        );
     }
 
     // Actually add the Google map to the view
     initializeGoogleMap([]);
 
-    // Create the list of user isochrones
-    isochrones = [];
-
     // Enable the form to update the isochrones and resultant intersection map
     document.getElementById("userParameters").onsubmit = function(e) {
         e.preventDefault();
 
-        isochroneFromForm = createIsochrone(
+        var isochroneFromForm = createIsochrone(
                 geocodeAddress(userParameters.origin.value),
                 parseInt(userParameters.travelTimeInMinutes.value),
                 userParameters.transportMode.value
