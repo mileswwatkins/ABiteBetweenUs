@@ -296,7 +296,7 @@ function main() {
 
     function addRestaurantToMap(place) {
         /*
-        Add an item to the map
+        Display a restaurant on the map
         */
 
         // Instantiate the marker
@@ -305,9 +305,21 @@ function main() {
             position: place.geometry.location
         });
 
-        // Define marker actions
+        // When clicked, have thee restaurant's information appear
+        var openOrClosedText = "Closed right now";
+        if (place.opening_hours.open_now) {
+            openOrClosedText = "Open right now";
+        }
+
         google.maps.event.addListener(marker, 'click', function() {
-            infoWindow.setContent(place.name);
+            infoWindow.setContent(
+                    "<p>" +
+                    "<b>" + place.name + "</b>" + "<br>" +
+                    place.vicinity + "<br>" +
+                    "Rating: " + place.rating + " out of 5" + "<br>" +
+                    openOrClosedText +
+                    "</p>"
+            );
             infoWindow.open(map, this);
         });
     }
@@ -327,8 +339,6 @@ function main() {
             ));
         });
 
-        intersectionPolygon = geoJSONToGooglePolygon(areaToSearch);
-
         // Set the search parameters and make the search
         // Display the results on the map
         var restaurantParameters = {
@@ -338,11 +348,20 @@ function main() {
         };
 
         var placesService = new google.maps.places.PlacesService(map);
+        intersectionPolygon = geoJSONToGooglePolygon(areaToSearch);
+        
         placesService.nearbySearch(
                 restaurantParameters,
                 function(results, status) {
+
+                    // Do not display pins if there is an error
                     if (status == google.maps.places.PlacesServiceStatus.OK) {
                         results.forEach(function(result) {
+
+                            /*
+                            Filter out restaurants that are not in the
+                            intersection of all isochrones
+                            */
                             if (google.maps.geometry.poly.containsLocation(
                                     result.geometry.location,
                                     intersectionPolygon)) {
