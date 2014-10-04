@@ -10,6 +10,7 @@ define([
 function main() {
     // Declare the map and user isochrones
     var map;
+    var infoWindow;
     var isochrones = [];
 
 
@@ -286,6 +287,9 @@ function main() {
             });
 
             intersectionPolygon.setMap(map);
+
+            // Add the restaurants to the map
+            infoWindow = new google.maps.InfoWindow();
             showRestaurantsWithinArea(intersect(polygons));
         }
     }
@@ -303,8 +307,8 @@ function main() {
 
         // Define marker actions
         google.maps.event.addListener(marker, 'click', function() {
-            infowindow.setContent(place.name);
-            infowindow.open(map, this);
+            infoWindow.setContent(place.name);
+            infoWindow.open(map, this);
         });
     }
 
@@ -323,10 +327,12 @@ function main() {
             ));
         });
 
+        intersectionPolygon = geoJSONToGooglePolygon(areaToSearch);
+
         // Set the search parameters and make the search
         // Display the results on the map
         var restaurantParameters = {
-            location: searchBounds,
+            bounds: searchBounds,
             rankBy: google.maps.places.RankBy.PROMINENCE,
             types: ["restaurant"]
         };
@@ -337,7 +343,11 @@ function main() {
                 function(results, status) {
                     if (status == google.maps.places.PlacesServiceStatus.OK) {
                         results.forEach(function(result) {
-                            addRestaurantToMap(result);
+                            if (google.maps.geometry.poly.containsLocation(
+                                    result.geometry.location,
+                                    intersectionPolygon)) {
+                                addRestaurantToMap(result);
+                            }
                         });
                     }
                 }
