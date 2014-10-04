@@ -3,6 +3,7 @@ ABiteBetweenUs
 
 Help friends find a restaurant that's convenient for everyone
 
-A project by Darian Bridges, Tyler Fisher, Scott Greiner, and Miles Watkins
+Rough demonstration of function:
+https://rawgit.com/mileswwatkins/ABiteBetweenUs/master/utilities/execute_script_in_browser.html
 
-For fun for now: http://obscure-forest-1836.herokuapp.com/
+A project by Darian Bridges, Tyler Fisher, Scott Greiner, and Miles Watkins
